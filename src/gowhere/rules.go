@@ -6,6 +6,7 @@ import (
 
 type Rule struct {
 	line_num int
+	directive string
 	code string
 	pattern string
 	target string
@@ -29,7 +30,13 @@ type RuleTestSet struct {
 func NewRule(line_num int, params []string) (*Rule, error) {
 	var r Rule
 
+	if len(params) < 3 {
+		return nil, fmt.Errorf("Not enough parameters on line %d: %v",
+			line_num, params)
+	}
+
 	r.line_num = line_num
+	r.directive = params[0]
 
 	if len(params) == 4 {
 		// redirect code pattern target
