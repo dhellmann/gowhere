@@ -2,7 +2,6 @@ package gowhere
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -24,9 +23,7 @@ func ParseRules(fd io.Reader) (*RuleSet, error) {
 
 		r, err := NewRule(line_num, strings.Fields(line))
 		if err != nil {
-			return &rules, fmt.Errorf(
-				"Could not parse rule on line %d (%s): %s",
-				line_num, input.Text(), err)
+			return &rules, err
 		}
 		rules.rules = append(rules.rules, *r)
 	}
