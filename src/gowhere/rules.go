@@ -11,6 +11,10 @@ type Rule struct {
 	target string
 }
 
+type RuleSet struct {
+	rules []Rule
+}
+
 func NewRule(line_num int, params []string) (*Rule, error) {
 	var r Rule
 
@@ -43,17 +47,4 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 
 	return nil, fmt.Errorf("Could not understand rule on line %d: %v", 
 		line_num, params)
-}
-
-type RuleSet struct {
-	rules []Rule
-}
-
-func (rules *RuleSet) Add(line_num int, params []string) error {
-	r, err := NewRule(line_num, params)
-	if err != nil {
-		return err
-	}
-	rules.rules = append(rules.rules, *r)
-	return nil
 }
