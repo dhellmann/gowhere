@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"gowhere"
 )
 
 var ignore_untested = flag.Bool("ignore-untested", false,
@@ -26,8 +28,19 @@ func main() {
 			"unrecognized arguments: %v\n", remaining[2:])
 		return
 	}
-	htaccess_file := remaining[0]
-	test_file := remaining[1]
-	fmt.Println(*ignore_untested, *error_untested,
-		htaccess_file, test_file)
+
+	htaccess_file, err := os.Open(remaining[0])
+	defer htaccess_file.Close()
+	if err != nil {
+                fmt.Fprintf(os.Stderr, "Could not read htaccess file %s: %v\n",
+			remaining[0], err)
+                return
+	}
+	rules, err := gowhere.ParseRules(htaccess_file)
+	if err != nil {
+                fmt.Fprintf(os.Stderr, "Could not parse htaccess file %s: %v\n",
+			remaining[0], err)
+                return
+	}
+	fmt.Printf("%v\n", *rules)
 }
