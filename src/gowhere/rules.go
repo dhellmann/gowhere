@@ -11,8 +11,19 @@ type Rule struct {
 	target string
 }
 
+type RuleTest struct {
+	line_num int
+	input string
+	code string
+	expected string
+}
+
 type RuleSet struct {
 	rules []Rule
+}
+
+type RuleTestSet struct {
+	tests []RuleTest
 }
 
 func NewRule(line_num int, params []string) (*Rule, error) {
@@ -45,6 +56,31 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Could not understand rule on line %d: %v", 
+	return nil, fmt.Errorf("Could not understand rule on line %d: %v",
+		line_num, params)
+}
+
+func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
+	var t RuleTest
+
+	t.line_num = line_num
+
+	if len(params) == 3 {
+		// input code expected
+		t.input = params[0]
+		t.code = params[1]
+		t.expected = params[2]
+		return &t, nil
+	}
+
+	if len(params) == 2 {
+		// input code
+		// (no expected redirect)
+		t.input = params[0]
+		t.code = params[1]
+		return &t, nil
+	}
+
+	return nil, fmt.Errorf("Could not understand test on line %d: %v",
 		line_num, params)
 }

@@ -42,5 +42,21 @@ func main() {
 			remaining[0], err)
                 return
 	}
+
+	test_file, err := os.Open(remaining[1])
+	defer test_file.Close()
+	if err != nil {
+                fmt.Fprintf(os.Stderr, "Could not read test file %s: %v\n",
+			remaining[1], err)
+                return
+	}
+	tests, err := gowhere.ParseTests(test_file)
+	if err != nil {
+                fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
+			remaining[1], err)
+                return
+	}
+
 	fmt.Printf("%v\n", *rules)
+	fmt.Printf("%v\n", *tests)
 }
