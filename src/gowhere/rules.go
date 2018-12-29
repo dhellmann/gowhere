@@ -123,3 +123,27 @@ func (rs *RuleSet) Match (target string) (*Rule) {
 
 	return nil
 }
+
+func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Rule, error) {
+	var r []Rule
+
+	seen := make(map[int]bool)
+	for match := rs.Match(test.input); match != nil; match = rs.Match(match.target) {
+		if len(r) > max_hops {
+			break
+		}
+		r = append(r, *match)
+		if seen[match.line_num] {
+			// cycle detected
+			break
+		}
+		seen[match.line_num] = true
+		if match.target == "" {
+			// a redirect that doesn't point to a path,
+			// like code 410
+			break
+		}
+	}
+
+	return r, nil
+}
