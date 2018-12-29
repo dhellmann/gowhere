@@ -119,15 +119,13 @@ func (r *Rule) Match (target string) (string) {
 
 	case "redirect":
 		if r.pattern == target {
-			fmt.Printf("matched: %v\n", *r)
-			return r.pattern
+			return r.target
 		}
 
 	case "redirectmatch":
 		match := r.re.FindStringSubmatch(target)
 		if len(match) > 0 {
-			fmt.Printf("matched: %v\n", match)
-			return r.pattern
+			return r.target
 		}
 	}
 
@@ -135,6 +133,7 @@ func (r *Rule) Match (target string) (string) {
 }
 
 func (rs *RuleSet) firstMatch (target string) (*Match) {
+	fmt.Printf("\nfirstMatch '%s'\n", target)
 
 	for _, r := range rs.rules {
 		s := r.Match(target)
@@ -150,22 +149,38 @@ func (rs *RuleSet) firstMatch (target string) (*Match) {
 func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
 	var r []Match
 
-	seen := make(map[int]bool)
-	for match := rs.firstMatch(test.input); match != nil; match = rs.firstMatch(match.target) {
-		if len(r) > max_hops {
+	seen := make(map[string]bool)
+	match := rs.firstMatch(test.input)
+	for {
+		if match == nil {
+			fmt.Printf("no more matches\n")
+			break
+		}
+
+		fmt.Printf("matched: %v\n", *match)
+
+		if seen[match.match] {
+			// cycle detected
+			fmt.Printf("cycle\n")
 			break
 		}
 		r = append(r, *match)
-		if seen[match.line_num] {
-			// cycle detected
+		seen[match.match] = true
+
+		if max_hops > 0 && len(r) > max_hops {
+			fmt.Printf("max hops\n")
 			break
 		}
-		seen[match.line_num] = true
-		if match.target == "" {
+
+		if match.match == "" {
 			// a redirect that doesn't point to a path,
 			// like code 410
+			fmt.Printf("no-target redirect\n")
 			break
 		}
+
+		// look for another item in a redirect chain
+		match = rs.firstMatch(match.match)
 	}
 
 	return r, nil

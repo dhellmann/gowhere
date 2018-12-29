@@ -66,5 +66,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Processing failure: %v\n", err)
 		return
 	}
-	fmt.Printf("%v\n", *results)
+
+	fmt.Printf("mismatched: %v\n", results.Mismatched)
+	fmt.Printf("exceeded hops: %v\n", results.ExceededHops)
+	fmt.Printf("cycles: %v\n", results.Cycles)
+	fmt.Printf("unmatched: %v\n", results.Unmatched)
 }
