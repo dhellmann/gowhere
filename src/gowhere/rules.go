@@ -123,10 +123,14 @@ func (r *Rule) Match(target string) string {
 		}
 
 	case "redirectmatch":
-		match := r.re.FindStringSubmatch(target)
-		if len(match) > 0 {
-			return r.target
+		// if the pattern matches, expand the references in the target
+		// to what was matched in the input so we can return a real
+		// path rather than a regexp
+		result := []byte{}
+		for _, submatches := range r.re.FindAllStringSubmatchIndex(target, -1) {
+			result = r.re.ExpandString(result, r.target, target, submatches)
 		}
+		return string(result)
 	}
 
 	return ""
