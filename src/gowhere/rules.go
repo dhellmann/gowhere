@@ -21,6 +21,11 @@ type RuleTest struct {
 	expected string
 }
 
+type Match struct {
+	Rule
+	match string
+}
+
 type RuleSet struct {
 	rules []Rule
 }
@@ -106,7 +111,7 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 		line_num, params)
 }
 
-func (r *Rule) Match (target string) (*Rule) {
+func (r *Rule) Match (target string) (string) {
 	fmt.Printf("checking: '%s' against %s '%s'\n", target,
 		r.directive, r.pattern)
 
@@ -115,33 +120,35 @@ func (r *Rule) Match (target string) (*Rule) {
 	case "redirect":
 		if r.pattern == target {
 			fmt.Printf("matched: %v\n", *r)
-			return r
+			return r.pattern
 		}
 
 	case "redirectmatch":
 		match := r.re.FindStringSubmatch(target)
 		if len(match) > 0 {
-			fmt.Printf("matched: %v\n", *r)
-			return r
+			fmt.Printf("matched: %v\n", match)
+			return r.pattern
 		}
 	}
 
-	return nil
+	return ""
 }
 
-func (rs *RuleSet) firstMatch (target string) (*Rule) {
+func (rs *RuleSet) firstMatch (target string) (*Match) {
 
 	for _, r := range rs.rules {
-		if r.Match(target) != nil {
-			return &r
+		s := r.Match(target)
+		if s != "" {
+			m := Match{r, s}
+			return &m
 		}
 	}
 
 	return nil
 }
 
-func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Rule, error) {
-	var r []Rule
+func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
+	var r []Match
 
 	seen := make(map[int]bool)
 	for match := rs.firstMatch(test.input); match != nil; match = rs.firstMatch(match.target) {
