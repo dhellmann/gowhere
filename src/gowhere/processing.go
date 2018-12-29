@@ -5,12 +5,12 @@ import (
 )
 
 type Mismatched struct {
-	test RuleTest
+	test    RuleTest
 	matches []Match
 }
 
 type Cycle struct {
-	test RuleTest
+	test    RuleTest
 	matches []Match
 }
 
@@ -70,8 +70,8 @@ func ProcessTests(rules *RuleSet, tests *RuleTestSet, max_hops int) (*Results, e
 				r.ExceededHops = append(
 					r.ExceededHops,
 					Mismatched{test, matches})
-			} else if (test.code != finalMatch.code ||
-				test.expected != finalMatch.match) {
+			} else if test.code != finalMatch.code ||
+				test.expected != finalMatch.match {
 				// There is at least one match, but
 				// the final URL and code are not the
 				// ones we expected.

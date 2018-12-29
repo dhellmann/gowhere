@@ -32,29 +32,29 @@ func main() {
 	htaccess_file, err := os.Open(remaining[0])
 	defer htaccess_file.Close()
 	if err != nil {
-                fmt.Fprintf(os.Stderr, "Could not read htaccess file %s: %v\n",
+		fmt.Fprintf(os.Stderr, "Could not read htaccess file %s: %v\n",
 			remaining[0], err)
-                return
+		return
 	}
 	rules, err := gowhere.ParseRules(htaccess_file)
 	if err != nil {
-                fmt.Fprintf(os.Stderr, "Could not parse htaccess file %s: %v\n",
+		fmt.Fprintf(os.Stderr, "Could not parse htaccess file %s: %v\n",
 			remaining[0], err)
-                return
+		return
 	}
 
 	test_file, err := os.Open(remaining[1])
 	defer test_file.Close()
 	if err != nil {
-                fmt.Fprintf(os.Stderr, "Could not read test file %s: %v\n",
+		fmt.Fprintf(os.Stderr, "Could not read test file %s: %v\n",
 			remaining[1], err)
-                return
+		return
 	}
 	tests, err := gowhere.ParseTests(test_file)
 	if err != nil {
-                fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
+		fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
 			remaining[1], err)
-                return
+		return
 	}
 
 	fmt.Printf("%v\n", *rules)

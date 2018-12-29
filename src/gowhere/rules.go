@@ -6,18 +6,18 @@ import (
 )
 
 type Rule struct {
-	line_num int
+	line_num  int
 	directive string
-	code string
-	pattern string
-	target string
-	re *regexp.Regexp
+	code      string
+	pattern   string
+	target    string
+	re        *regexp.Regexp
 }
 
 type RuleTest struct {
 	line_num int
-	input string
-	code string
+	input    string
+	code     string
 	expected string
 }
 
@@ -111,7 +111,7 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 		line_num, params)
 }
 
-func (r *Rule) Match (target string) (string) {
+func (r *Rule) Match(target string) string {
 	fmt.Printf("checking: '%s' against %s '%s'\n", target,
 		r.directive, r.pattern)
 
@@ -132,7 +132,7 @@ func (r *Rule) Match (target string) (string) {
 	return ""
 }
 
-func (rs *RuleSet) firstMatch (target string) (*Match) {
+func (rs *RuleSet) firstMatch(target string) *Match {
 	fmt.Printf("\nfirstMatch '%s'\n", target)
 
 	for _, r := range rs.rules {
