@@ -106,18 +106,34 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 		line_num, params)
 }
 
-func (rs *RuleSet) Match (target string) (*Rule) {
+func (r *Rule) Match (target string) (*Rule) {
+	fmt.Printf("checking: '%s' against %s '%s'\n", target,
+		r.directive, r.pattern)
+
+	switch r.directive {
+
+	case "redirect":
+		if r.pattern == target {
+			fmt.Printf("matched: %v\n", *r)
+			return r
+		}
+
+	case "redirectmatch":
+		match := r.re.FindStringSubmatch(target)
+		if len(match) > 0 {
+			fmt.Printf("matched: %v\n", *r)
+			return r
+		}
+	}
+
+	return nil
+}
+
+func (rs *RuleSet) firstMatch (target string) (*Rule) {
 
 	for _, r := range rs.rules {
-		fmt.Printf("checking: '%s' against %s '%s'\n", target,
-			r.directive, r.pattern)
-		switch r.directive {
-		case "redirect":
-			if r.pattern == target {
-				fmt.Printf("matched: %v\n", r)
-				return &r
-			}
-		case "redirectmatch":
+		if r.Match(target) != nil {
+			return &r
 		}
 	}
 
@@ -128,7 +144,7 @@ func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Rule, error) {
 	var r []Rule
 
 	seen := make(map[int]bool)
-	for match := rs.Match(test.input); match != nil; match = rs.Match(match.target) {
+	for match := rs.firstMatch(test.input); match != nil; match = rs.firstMatch(match.target) {
 		if len(r) > max_hops {
 			break
 		}
