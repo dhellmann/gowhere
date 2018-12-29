@@ -59,4 +59,12 @@ func main() {
 
 	fmt.Printf("%v\n", *rules)
 	fmt.Printf("%v\n", *tests)
+
+	results, err := gowhere.ProcessTests(rules, tests, *max_hops)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Processing failure: %v\n", err)
+		return
+	}
+	fmt.Printf("%v\n", *results)
 }

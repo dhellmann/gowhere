@@ -91,3 +91,21 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 	return nil, fmt.Errorf("Could not understand test on line %d: %v",
 		line_num, params)
 }
+
+func (rs *RuleSet) Match (target string) (*Rule) {
+
+	for _, r := range rs.rules {
+		fmt.Printf("checking: '%s' against %s '%s'\n", target,
+			r.directive, r.pattern)
+		switch r.directive {
+		case "redirect":
+			if r.pattern == target {
+				fmt.Printf("matched: %v\n", r)
+				return &r
+			}
+		case "redirectmatch":
+		}
+	}
+
+	return nil
+}
