@@ -2,6 +2,7 @@ package gowhere
 
 import (
 	"fmt"
+	"regexp"
 )
 
 type Rule struct {
@@ -10,6 +11,7 @@ type Rule struct {
 	code string
 	pattern string
 	target string
+	re *regexp.Regexp
 }
 
 type RuleTest struct {
@@ -43,28 +45,40 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 		r.code = params[1]
 		r.pattern = params[2]
 		r.target = params[3]
-		return &r, nil
-	}
-
-	if len(params) == 3 {
+	} else if len(params) == 3 {
 		if params[1] == "410" {
 			// The page has been deleted and is not coming
 			// back (nil target).
 			r.code = params[1]
 			r.pattern = params[2]
-			return &r, nil
 		} else {
 			// redirect pattern target
 			// (code is implied)
 			r.code = "301"
 			r.pattern = params[1]
-			r.target = params[2]
-			return &r, nil
 		}
+	} else {
+		return nil, fmt.Errorf("Could not understand rule on line %d: %v",
+			line_num, params)
 	}
 
-	return nil, fmt.Errorf("Could not understand rule on line %d: %v",
-		line_num, params)
+	// Verify that we understand the directive and compile the
+	// regexp if there is one.
+	switch r.directive {
+	case "redirect":
+	case "redirectmatch":
+		re, err := regexp.Compile(r.pattern)
+		if err != nil {
+			return nil, fmt.Errorf("Could not understand regexp '%s' in rule on line %d: %v",
+				r.pattern, line_num, params)
+		}
+		r.re = re
+	default:
+		return nil, fmt.Errorf("Could not understand dirctive '%s' in rule on line %d: %v",
+			r.directive, line_num, params)
+	}
+
+	return &r, nil
 }
 
 func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
