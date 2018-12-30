@@ -5,36 +5,54 @@ import (
 	"regexp"
 )
 
+// A redirect rule
 type Rule struct {
+	// The line of the input file where the rule was found
 	LineNum   int
+	// The Apache directive ("redirect" or "redirectmatch")
 	Directive string
+	// The HTTP response code ("301", etc.)
 	Code      string
+	// The pattern to match (a literal for "redirect" and a regexp for
+	// "redirectmatch")
 	Pattern   string
+	// The destination of the redirection. May include regexp group
+	// substitutions for "redirectmatch" (e.g., "$1")
 	Target    string
 	re        *regexp.Regexp
 }
 
+// Return a nicely formatted version of the Rule
 func (r *Rule) String() string {
 	return fmt.Sprintf("[line %d] %s %s %s %s",
 		r.LineNum, r.Directive, r.Pattern, r.Code, r.Target)
 }
 
+// A test for a Rule
 type Check struct {
+	// The line of the input file where the check was found
 	LineNum  int
+	// The input to give to the RuleSet
 	Input    string
+	// The expected HTTP response code
 	Code     string
+	// The expected destination of the redirection
 	Expected string
 }
 
+// A Rule that has matched
 type Match struct {
 	Rule
+	// The matched destination for the redirection
 	Match string
 }
 
+// A group of Rules
 type RuleSet struct {
 	rules []Rule
 }
 
+// Create a Rule from the strings on the input line
 func NewRule(line_num int, params []string) (*Rule, error) {
 	var r Rule
 
@@ -87,6 +105,7 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 	return &r, nil
 }
 
+// Create a Check from the strings on the input line
 func NewCheck(line_num int, params []string) (*Check, error) {
 	var t Check
 
@@ -112,6 +131,11 @@ func NewCheck(line_num int, params []string) (*Check, error) {
 		line_num, params)
 }
 
+// Test whether the rule matches the target string.
+//
+// Returns the matching string, so when the rule pattern is a regexp
+// and the target includes substitutions the return value is the
+// actual path to which the redirect would send the browser.
 func (r *Rule) Match(target string) string {
 	switch r.Directive {
 
@@ -155,6 +179,7 @@ func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
 	return nil
 }
 
+// Find all of the Rules that match the test.
 func (rs *RuleSet) FindMatches(check *Check, settings Settings) []Match {
 	var r []Match
 
