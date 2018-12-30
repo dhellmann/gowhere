@@ -111,5 +111,6 @@ func main() {
 
 	if failures > 0 {
 		fmt.Fprintf(os.Stderr, "\n%d failures\n", failures)
+		os.Exit(1)
 	}
 }
