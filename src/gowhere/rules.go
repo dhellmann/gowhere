@@ -117,9 +117,6 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 }
 
 func (r *Rule) Match(target string) string {
-	fmt.Printf("checking: '%s' against %s '%s'\n", target,
-		r.directive, r.pattern)
-
 	switch r.directive {
 
 	case "redirect":
@@ -141,10 +138,17 @@ func (r *Rule) Match(target string) string {
 	return ""
 }
 
-func (rs *RuleSet) firstMatch(target string) *Match {
-	fmt.Printf("\nfirstMatch '%s'\n", target)
+func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
+	if verbose {
+		fmt.Printf("\nfirstMatch '%s'\n", target)
+	}
 
 	for _, r := range rs.rules {
+		if verbose {
+			fmt.Printf("checking: '%s' against %s '%s'\n", target,
+				r.directive, r.pattern)
+		}
+
 		s := r.Match(target)
 		if s != "" {
 			m := Match{r, s}
@@ -155,41 +159,51 @@ func (rs *RuleSet) firstMatch(target string) *Match {
 	return nil
 }
 
-func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
+func (rs *RuleSet) FindMatches(test *RuleTest, settings Settings) ([]Match, error) {
 	var r []Match
 
 	seen := make(map[string]bool)
-	match := rs.firstMatch(test.Input)
+	match := rs.firstMatch(test.Input, settings.Verbose)
 	for {
 		if match == nil {
-			fmt.Printf("no more matches\n")
+			if settings.Verbose {
+				fmt.Printf("no more matches\n")
+			}
 			break
 		}
 
-		fmt.Printf("matched: %v\n", *match)
+		if settings.Verbose {
+			fmt.Printf("matched: %v\n", *match)
+		}
 
 		if seen[match.Match] {
 			// cycle detected
-			fmt.Printf("cycle\n")
+			if settings.Verbose {
+				fmt.Printf("cycle\n")
+			}
 			break
 		}
 		r = append(r, *match)
 		seen[match.Match] = true
 
-		if max_hops > 0 && len(r) > max_hops {
-			fmt.Printf("max hops\n")
+		if settings.MaxHops > 0 && len(r) > settings.MaxHops {
+			if settings.Verbose {
+				fmt.Printf("max hops\n")
+			}
 			break
 		}
 
 		if match.Match == "" {
 			// a redirect that doesn't point to a path,
 			// like code 410
-			fmt.Printf("no-target redirect\n")
+			if settings.Verbose {
+				fmt.Printf("no-target redirect\n")
+			}
 			break
 		}
 
 		// look for another item in a redirect chain
-		match = rs.firstMatch(match.Match)
+		match = rs.firstMatch(match.Match, settings.Verbose)
 	}
 
 	return r, nil

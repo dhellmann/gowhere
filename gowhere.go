@@ -66,10 +66,8 @@ func main() {
 		return
 	}
 
-	fmt.Printf("%v\n", *rules)
-	fmt.Printf("%v\n", *tests)
-
-	results, err := gowhere.ProcessTests(rules, tests, *max_hops)
+	settings := gowhere.Settings{*verbose, *max_hops}
+	results, err := gowhere.ProcessTests(rules, tests, settings)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Processing failure: %v\n", err)
@@ -78,7 +76,10 @@ func main() {
 
 	failures := 0
 
-	fmt.Println("")
+	if *verbose {
+		fmt.Println("")
+	}
+
 	for _, item := range results.Mismatched {
 		failures++
 		if len(item.Matches) > 0 {

@@ -22,17 +22,26 @@ type Results struct {
 	Matched []Rule
 }
 
-func ProcessTests(rules *RuleSet, tests *RuleTestSet, max_hops int) (*Results, error) {
+type Settings struct {
+	Verbose bool
+	MaxHops int
+}
+
+func ProcessTests(rules *RuleSet, tests *RuleTestSet, settings Settings) (*Results, error) {
 	r := Results{}
 	used := make(map[int]bool)
 
 	for _, test := range tests.tests {
-		fmt.Printf("\ntest: %v\n", test)
-		matches, err := rules.FindMatches(&test, max_hops)
+		if settings.Verbose {
+			fmt.Printf("\ntest: %v\n", test)
+		}
+		matches, err := rules.FindMatches(&test, settings)
 		if err != nil {
 			return &r, err
 		}
-		fmt.Printf("found %d matches: %v\n", len(matches), matches)
+		if settings.Verbose {
+			fmt.Printf("found %d matches: %v\n", len(matches), matches)
+		}
 		if len(matches) == 0 {
 			if test.Code == "200" {
 				// The test is ensuring that a URL
@@ -58,7 +67,7 @@ func ProcessTests(rules *RuleSet, tests *RuleTestSet, max_hops int) (*Results, e
 				// the starting point, so we have a cycle
 				r.Cycles = append(r.Cycles,
 					Mismatched{test, matches})
-			} else if max_hops > 0 && len(matches) > max_hops {
+			} else if settings.MaxHops > 0 && len(matches) > settings.MaxHops {
 				// Regardless of whether we ended up
 				// in the right place, it took too
 				// many hops to get there.
