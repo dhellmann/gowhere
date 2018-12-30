@@ -80,6 +80,7 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 			// (code is implied)
 			r.Code = "301"
 			r.Pattern = params[1]
+			r.Target = params[2]
 		}
 	} else {
 		return nil, fmt.Errorf("Could not understand rule on line %d: %v",
