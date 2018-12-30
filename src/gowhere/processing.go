@@ -4,11 +4,13 @@ import (
 	"fmt"
 )
 
+// Results when a Check produces unexpected matches
 type Mismatched struct {
 	Check    Check
 	Matches []Match
 }
 
+// Processing results
 type Results struct {
 	// inputs that did not match the expected value
 	Mismatched []Mismatched
@@ -22,11 +24,13 @@ type Results struct {
 	Matched []Rule
 }
 
+// Processing input settings
 type Settings struct {
 	Verbose bool
 	MaxHops int
 }
 
+// Run all of the rules against the checks and produce a results set.
 func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) (*Results, error) {
 	r := Results{}
 	used := make(map[int]bool)
