@@ -30,8 +30,8 @@ func ParseRules(fd io.Reader) (*RuleSet, error) {
 	return &rules, nil
 }
 
-func ParseTests(fd io.Reader) (*RuleTestSet, error) {
-	var tests RuleTestSet
+func ParseChecks(fd io.Reader) ([]Check, error) {
+	var checks []Check
 	line_num := 0
 	input := bufio.NewScanner(fd)
 	for input.Scan() {
@@ -45,11 +45,11 @@ func ParseTests(fd io.Reader) (*RuleTestSet, error) {
 			continue
 		}
 
-		t, err := NewRuleTest(line_num, strings.Fields(line))
+		t, err := NewCheck(line_num, strings.Fields(line))
 		if err != nil {
-			return &tests, err
+			return checks, err
 		}
-		tests.tests = append(tests.tests, *t)
+		checks = append(checks, *t)
 	}
-	return &tests, nil
+	return checks, nil
 }

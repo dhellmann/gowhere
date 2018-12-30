@@ -5,7 +5,7 @@ import (
 )
 
 type Mismatched struct {
-	Test    RuleTest
+	Check    Check
 	Matches []Match
 }
 
@@ -27,15 +27,15 @@ type Settings struct {
 	MaxHops int
 }
 
-func ProcessTests(rules *RuleSet, tests *RuleTestSet, settings Settings) (*Results, error) {
+func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) (*Results, error) {
 	r := Results{}
 	used := make(map[int]bool)
 
-	for _, test := range tests.tests {
+	for _, check := range checks {
 		if settings.Verbose {
-			fmt.Printf("\ntest: %v\n", test)
+			fmt.Printf("\ncheck: %v\n", check)
 		}
-		matches, err := rules.FindMatches(&test, settings)
+		matches, err := rules.FindMatches(&check, settings)
 		if err != nil {
 			return &r, err
 		}
@@ -43,48 +43,48 @@ func ProcessTests(rules *RuleSet, tests *RuleTestSet, settings Settings) (*Resul
 			fmt.Printf("found %d matches: %v\n", len(matches), matches)
 		}
 		if len(matches) == 0 {
-			if test.Code == "200" {
-				// The test is ensuring that a URL
-				// does *not* redirect, so the test is
+			if check.Code == "200" {
+				// The check is ensuring that a URL
+				// does *not* redirect, so the check is
 				// passing.
 			} else {
-				// The test did not match any rules,
+				// The check did not match any rules,
 				// so record the mismatch as having
 				// not redirected.
 				r.Mismatched = append(
 					r.Mismatched,
-					Mismatched{test, matches})
+					Mismatched{check, matches})
 			}
 		} else {
 			// Record only the first match as used,
-			// encouraging individual tests for each rule.
+			// encouraging individual checks for each rule.
 			used[matches[0].LineNum] = true
 
 			// Look for cycles, mismatches, etc.
 			finalMatch := matches[len(matches)-1]
-			if test.Input == finalMatch.Match {
+			if check.Input == finalMatch.Match {
 				// The matches resulted in going back to
 				// the starting point, so we have a cycle
 				r.Cycles = append(r.Cycles,
-					Mismatched{test, matches})
+					Mismatched{check, matches})
 			} else if settings.MaxHops > 0 && len(matches) > settings.MaxHops {
 				// Regardless of whether we ended up
 				// in the right place, it took too
 				// many hops to get there.
 				r.ExceededHops = append(
 					r.ExceededHops,
-					Mismatched{test, matches})
-			} else if test.Code != finalMatch.Code ||
-				test.Expected != finalMatch.Match {
+					Mismatched{check, matches})
+			} else if check.Code != finalMatch.Code ||
+				check.Expected != finalMatch.Match {
 				// There is at least one match, but
 				// the final URL and code are not the
 				// ones we expected.
 				r.Mismatched = append(
 					r.Mismatched,
-					Mismatched{test, matches})
+					Mismatched{check, matches})
 			} else {
 				// Recognize that the first
-				// rule was tested properly.
+				// rule was checked properly.
 				used[matches[0].LineNum] = true
 			}
 		}

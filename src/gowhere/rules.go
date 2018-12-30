@@ -19,7 +19,7 @@ func (r *Rule) String() string {
 		r.LineNum, r.directive, r.pattern, r.Code, r.target)
 }
 
-type RuleTest struct {
+type Check struct {
 	LineNum  int
 	Input    string
 	Code     string
@@ -33,10 +33,6 @@ type Match struct {
 
 type RuleSet struct {
 	rules []Rule
-}
-
-type RuleTestSet struct {
-	tests []RuleTest
 }
 
 func NewRule(line_num int, params []string) (*Rule, error) {
@@ -91,8 +87,8 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 	return &r, nil
 }
 
-func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
-	var t RuleTest
+func NewCheck(line_num int, params []string) (*Check, error) {
+	var t Check
 
 	t.LineNum = line_num
 
@@ -112,7 +108,7 @@ func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 		return &t, nil
 	}
 
-	return nil, fmt.Errorf("Could not understand test on line %d: %v",
+	return nil, fmt.Errorf("Could not understand check on line %d: %v",
 		line_num, params)
 }
 
@@ -159,11 +155,11 @@ func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
 	return nil
 }
 
-func (rs *RuleSet) FindMatches(test *RuleTest, settings Settings) ([]Match, error) {
+func (rs *RuleSet) FindMatches(check *Check, settings Settings) ([]Match, error) {
 	var r []Match
 
 	seen := make(map[string]bool)
-	match := rs.firstMatch(test.Input, settings.Verbose)
+	match := rs.firstMatch(check.Input, settings.Verbose)
 	for {
 		if match == nil {
 			if settings.Verbose {

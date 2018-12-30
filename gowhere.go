@@ -15,12 +15,12 @@ var error_untested = flag.Bool("error-untested", false,
 var max_hops = flag.Int("max-hops", 0, "how many hops are allowed")
 var verbose = flag.Bool("v", false, "turn on verbose output")
 
-func showTestAndMatches(msg string, test *gowhere.RuleTest, matches []gowhere.Match) {
+func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Match) {
 	fmt.Printf("%s on line %d: '%s' should produce %s '%s'\n",
-		msg, test.LineNum, test.Input, test.Code, test.Expected)
+		msg, check.LineNum, check.Input, check.Code, check.Expected)
 	for _, m := range matches {
 		fmt.Printf("    %s -> %s %s [line %d]\n",
-			test.Input, m.Code, m.Match, m.LineNum)
+			check.Input, m.Code, m.Match, m.LineNum)
 	}
 }
 
@@ -59,7 +59,7 @@ func main() {
 			remaining[1], err)
 		return
 	}
-	tests, err := gowhere.ParseTests(test_file)
+	checks, err := gowhere.ParseChecks(test_file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
 			remaining[1], err)
@@ -67,7 +67,7 @@ func main() {
 	}
 
 	settings := gowhere.Settings{*verbose, *max_hops}
-	results, err := gowhere.ProcessTests(rules, tests, settings)
+	results, err := gowhere.ProcessChecks(rules, checks, settings)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Processing failure: %v\n", err)
@@ -83,24 +83,24 @@ func main() {
 	for _, item := range results.Mismatched {
 		failures++
 		if len(item.Matches) > 0 {
-			showTestAndMatches("Unexpected rule matched test",
-				&(item.Test), item.Matches)
+			showCheckAndMatches("Unexpected rule matched check",
+				&(item.Check), item.Matches)
 		} else {
-			showTestAndMatches("No rule matched test",
-				&(item.Test), item.Matches)
+			showCheckAndMatches("No rule matched check",
+				&(item.Check), item.Matches)
 		}
 	}
 
 	for _, item := range results.Cycles {
 		failures++
-		showTestAndMatches("Cycle found from rule",
-			&(item.Test), item.Matches)
+		showCheckAndMatches("Cycle found from rule",
+			&(item.Check), item.Matches)
 	}
 
 	for _, item := range results.ExceededHops {
 		failures++
-		showTestAndMatches("Excessive redirects found from rule",
-			&(item.Test), item.Matches)
+		showCheckAndMatches("Excessive redirects found from rule",
+			&(item.Check), item.Matches)
 	}
 
 	for _, item := range results.Unmatched {
