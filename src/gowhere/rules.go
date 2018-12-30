@@ -7,16 +7,16 @@ import (
 
 type Rule struct {
 	LineNum   int
-	directive string
+	Directive string
 	Code      string
-	pattern   string
-	target    string
+	Pattern   string
+	Target    string
 	re        *regexp.Regexp
 }
 
 func (r *Rule) String() string {
 	return fmt.Sprintf("[line %d] %s %s %s %s",
-		r.LineNum, r.directive, r.pattern, r.Code, r.target)
+		r.LineNum, r.Directive, r.Pattern, r.Code, r.Target)
 }
 
 type Check struct {
@@ -44,24 +44,24 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 	}
 
 	r.LineNum = line_num
-	r.directive = params[0]
+	r.Directive = params[0]
 
 	if len(params) == 4 {
 		// redirect code pattern target
 		r.Code = params[1]
-		r.pattern = params[2]
-		r.target = params[3]
+		r.Pattern = params[2]
+		r.Target = params[3]
 	} else if len(params) == 3 {
 		if params[1] == "410" {
 			// The page has been deleted and is not coming
 			// back (nil target).
 			r.Code = params[1]
-			r.pattern = params[2]
+			r.Pattern = params[2]
 		} else {
 			// redirect pattern target
 			// (code is implied)
 			r.Code = "301"
-			r.pattern = params[1]
+			r.Pattern = params[1]
 		}
 	} else {
 		return nil, fmt.Errorf("Could not understand rule on line %d: %v",
@@ -70,18 +70,18 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 
 	// Verify that we understand the directive and compile the
 	// regexp if there is one.
-	switch r.directive {
+	switch r.Directive {
 	case "redirect":
 	case "redirectmatch":
-		re, err := regexp.Compile(r.pattern)
+		re, err := regexp.Compile(r.Pattern)
 		if err != nil {
 			return nil, fmt.Errorf("Could not understand regexp '%s' in rule on line %d: %v",
-				r.pattern, line_num, params)
+				r.Pattern, line_num, params)
 		}
 		r.re = re
 	default:
 		return nil, fmt.Errorf("Could not understand dirctive '%s' in rule on line %d: %v",
-			r.directive, line_num, params)
+			r.Directive, line_num, params)
 	}
 
 	return &r, nil
@@ -113,11 +113,11 @@ func NewCheck(line_num int, params []string) (*Check, error) {
 }
 
 func (r *Rule) Match(target string) string {
-	switch r.directive {
+	switch r.Directive {
 
 	case "redirect":
-		if r.pattern == target {
-			return r.target
+		if r.Pattern == target {
+			return r.Target
 		}
 
 	case "redirectmatch":
@@ -126,7 +126,7 @@ func (r *Rule) Match(target string) string {
 		// path rather than a regexp
 		result := []byte{}
 		for _, submatches := range r.re.FindAllStringSubmatchIndex(target, -1) {
-			result = r.re.ExpandString(result, r.target, target, submatches)
+			result = r.re.ExpandString(result, r.Target, target, submatches)
 		}
 		return string(result)
 	}
@@ -142,7 +142,7 @@ func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
 	for _, r := range rs.rules {
 		if verbose {
 			fmt.Printf("checking: '%s' against %s '%s'\n", target,
-				r.directive, r.pattern)
+				r.Directive, r.Pattern)
 		}
 
 		s := r.Match(target)
