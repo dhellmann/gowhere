@@ -1,0 +1,13 @@
+# sample file
+redirectmatch 301 ^/project/([^/]+)/old_page.html$ /project/$1/new_page.html
+
+redirect 301 /project/def/new_page.html /project/def/other_page.html
+
+redirectmatch 301 ^/renamed/old/ /renamed/new1/
+redirectmatch 301 ^/renamed/new1/ /renamed/new2/
+
+redirect 301 /old_root/index.html /new_root/index.html
+
+redirect 301 /cycle/a /cycle/b
+redirect 301 /cycle/b /cycle/c
+redirect 301 /cycle/c /cycle/a
