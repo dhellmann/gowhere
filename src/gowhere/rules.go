@@ -155,7 +155,7 @@ func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
 	return nil
 }
 
-func (rs *RuleSet) FindMatches(check *Check, settings Settings) ([]Match, error) {
+func (rs *RuleSet) FindMatches(check *Check, settings Settings) []Match {
 	var r []Match
 
 	seen := make(map[string]bool)
@@ -202,5 +202,5 @@ func (rs *RuleSet) FindMatches(check *Check, settings Settings) ([]Match, error)
 		match = rs.firstMatch(match.Match, settings.Verbose)
 	}
 
-	return r, nil
+	return r
 }

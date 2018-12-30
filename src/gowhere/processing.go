@@ -35,10 +35,7 @@ func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) (*Results,
 		if settings.Verbose {
 			fmt.Printf("\ncheck: %v\n", check)
 		}
-		matches, err := rules.FindMatches(&check, settings)
-		if err != nil {
-			return &r, err
-		}
+		matches := rules.FindMatches(&check, settings)
 		if settings.Verbose {
 			fmt.Printf("found %d matches: %v\n", len(matches), matches)
 		}
