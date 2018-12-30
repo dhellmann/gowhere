@@ -6,24 +6,29 @@ import (
 )
 
 type Rule struct {
-	line_num  int
+	LineNum   int
 	directive string
-	code      string
+	Code      string
 	pattern   string
 	target    string
 	re        *regexp.Regexp
 }
 
+func (r *Rule) String() string {
+	return fmt.Sprintf("[line %d] %s %s %s %s",
+		r.LineNum, r.directive, r.pattern, r.Code, r.target)
+}
+
 type RuleTest struct {
-	line_num int
-	input    string
-	code     string
-	expected string
+	LineNum  int
+	Input    string
+	Code     string
+	Expected string
 }
 
 type Match struct {
 	Rule
-	match string
+	Match string
 }
 
 type RuleSet struct {
@@ -42,24 +47,24 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 			line_num, params)
 	}
 
-	r.line_num = line_num
+	r.LineNum = line_num
 	r.directive = params[0]
 
 	if len(params) == 4 {
 		// redirect code pattern target
-		r.code = params[1]
+		r.Code = params[1]
 		r.pattern = params[2]
 		r.target = params[3]
 	} else if len(params) == 3 {
 		if params[1] == "410" {
 			// The page has been deleted and is not coming
 			// back (nil target).
-			r.code = params[1]
+			r.Code = params[1]
 			r.pattern = params[2]
 		} else {
 			// redirect pattern target
 			// (code is implied)
-			r.code = "301"
+			r.Code = "301"
 			r.pattern = params[1]
 		}
 	} else {
@@ -89,21 +94,21 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 func NewRuleTest(line_num int, params []string) (*RuleTest, error) {
 	var t RuleTest
 
-	t.line_num = line_num
+	t.LineNum = line_num
 
 	if len(params) == 3 {
 		// input code expected
-		t.input = params[0]
-		t.code = params[1]
-		t.expected = params[2]
+		t.Input = params[0]
+		t.Code = params[1]
+		t.Expected = params[2]
 		return &t, nil
 	}
 
 	if len(params) == 2 {
 		// input code
 		// (no expected redirect)
-		t.input = params[0]
-		t.code = params[1]
+		t.Input = params[0]
+		t.Code = params[1]
 		return &t, nil
 	}
 
@@ -154,7 +159,7 @@ func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
 	var r []Match
 
 	seen := make(map[string]bool)
-	match := rs.firstMatch(test.input)
+	match := rs.firstMatch(test.Input)
 	for {
 		if match == nil {
 			fmt.Printf("no more matches\n")
@@ -163,20 +168,20 @@ func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
 
 		fmt.Printf("matched: %v\n", *match)
 
-		if seen[match.match] {
+		if seen[match.Match] {
 			// cycle detected
 			fmt.Printf("cycle\n")
 			break
 		}
 		r = append(r, *match)
-		seen[match.match] = true
+		seen[match.Match] = true
 
 		if max_hops > 0 && len(r) > max_hops {
 			fmt.Printf("max hops\n")
 			break
 		}
 
-		if match.match == "" {
+		if match.Match == "" {
 			// a redirect that doesn't point to a path,
 			// like code 410
 			fmt.Printf("no-target redirect\n")
@@ -184,7 +189,7 @@ func (rs *RuleSet) FindMatches(test *RuleTest, max_hops int) ([]Match, error) {
 		}
 
 		// look for another item in a redirect chain
-		match = rs.firstMatch(match.match)
+		match = rs.firstMatch(match.Match)
 	}
 
 	return r, nil

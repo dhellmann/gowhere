@@ -15,6 +15,15 @@ var error_untested = flag.Bool("error-untested", false,
 var max_hops = flag.Int("max-hops", 0, "how many hops are allowed")
 var verbose = flag.Bool("v", false, "turn on verbose output")
 
+func showTestAndMatches(msg string, test *gowhere.RuleTest, matches []gowhere.Match) {
+	fmt.Printf("%s on line %d: '%s' should produce %s '%s'\n",
+		msg, test.LineNum, test.Input, test.Code, test.Expected)
+	for _, m := range matches {
+		fmt.Printf("    %s -> %s %s [line %d]\n",
+			test.Input, m.Code, m.Match, m.LineNum)
+	}
+}
+
 func main() {
 	flag.Parse()
 	remaining := flag.Args()
@@ -67,8 +76,40 @@ func main() {
 		return
 	}
 
-	fmt.Printf("mismatched: %v\n", results.Mismatched)
-	fmt.Printf("exceeded hops: %v\n", results.ExceededHops)
-	fmt.Printf("cycles: %v\n", results.Cycles)
-	fmt.Printf("unmatched: %v\n", results.Unmatched)
+	failures := 0
+
+	fmt.Println("")
+	for _, item := range results.Mismatched {
+		failures++
+		if len(item.Matches) > 0 {
+			showTestAndMatches("Unexpected rule matched test",
+				&(item.Test), item.Matches)
+		} else {
+			showTestAndMatches("No rule matched test",
+				&(item.Test), item.Matches)
+		}
+	}
+
+	for _, item := range results.Cycles {
+		failures++
+		showTestAndMatches("Cycle found from rule",
+			&(item.Test), item.Matches)
+	}
+
+	for _, item := range results.ExceededHops {
+		failures++
+		showTestAndMatches("Excessive redirects found from rule",
+			&(item.Test), item.Matches)
+	}
+
+	for _, item := range results.Unmatched {
+		if *error_untested {
+			failures++
+		}
+		fmt.Printf("Untested rule %s\n", item.String())
+	}
+
+	if failures > 0 {
+		fmt.Fprintf(os.Stderr, "\n%d failures\n", failures)
+	}
 }
