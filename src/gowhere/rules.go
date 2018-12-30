@@ -8,18 +8,18 @@ import (
 // A redirect rule
 type Rule struct {
 	// The line of the input file where the rule was found
-	LineNum   int
+	LineNum int
 	// The Apache directive ("redirect" or "redirectmatch")
 	Directive string
 	// The HTTP response code ("301", etc.)
-	Code      string
+	Code string
 	// The pattern to match (a literal for "redirect" and a regexp for
 	// "redirectmatch")
-	Pattern   string
+	Pattern string
 	// The destination of the redirection. May include regexp group
 	// substitutions for "redirectmatch" (e.g., "$1")
-	Target    string
-	re        *regexp.Regexp
+	Target string
+	re     *regexp.Regexp
 }
 
 // Return a nicely formatted version of the Rule
@@ -31,11 +31,11 @@ func (r *Rule) String() string {
 // A test for a Rule
 type Check struct {
 	// The line of the input file where the check was found
-	LineNum  int
+	LineNum int
 	// The input to give to the RuleSet
-	Input    string
+	Input string
 	// The expected HTTP response code
-	Code     string
+	Code string
 	// The expected destination of the redirection
 	Expected string
 }

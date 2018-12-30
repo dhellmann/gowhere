@@ -6,7 +6,7 @@ import (
 
 // Results when a Check produces unexpected matches
 type Mismatched struct {
-	Check    Check
+	Check   Check
 	Matches []Match
 }
 

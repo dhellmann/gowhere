@@ -8,17 +8,16 @@ import (
 
 type Want struct {
 	directive string
-	code string
-	pattern string
-	target string
-	re bool
+	code      string
+	pattern   string
+	target    string
+	re        bool
 }
 
-
 func TestNewRule(t *testing.T) {
-	var tests = [] struct {
+	var tests = []struct {
 		input []string
-		want Want
+		want  Want
 	}{
 
 		{
@@ -27,10 +26,10 @@ func TestNewRule(t *testing.T) {
 				"/project/def/other_page.html"},
 			Want{
 				directive: "redirect",
-				code: "301",
-				pattern: "/project/def/new_page.html",
-				target: "/project/def/other_page.html",
-				re: false,
+				code:      "301",
+				pattern:   "/project/def/new_page.html",
+				target:    "/project/def/other_page.html",
+				re:        false,
 			},
 		},
 
@@ -39,23 +38,23 @@ func TestNewRule(t *testing.T) {
 				"/project/def/new_page.html"},
 			Want{
 				directive: "redirect",
-				code: "410",
-				pattern: "/project/def/new_page.html",
-				target: "",
-				re: false,
+				code:      "410",
+				pattern:   "/project/def/new_page.html",
+				target:    "",
+				re:        false,
 			},
 		},
 
 		{
 			[]string{"redirect",
 				"/project/def/new_page.html",
-				"/project/def/other_page.html",},
+				"/project/def/other_page.html"},
 			Want{
 				directive: "redirect",
-				code: "301",
-				pattern: "/project/def/new_page.html",
-				target: "/project/def/other_page.html",
-				re: false,
+				code:      "301",
+				pattern:   "/project/def/new_page.html",
+				target:    "/project/def/other_page.html",
+				re:        false,
 			},
 		},
 
@@ -63,16 +62,15 @@ func TestNewRule(t *testing.T) {
 			[]string{"redirectmatch",
 				"301",
 				"^/project/([^/]+)/old_page.html$",
-				"/project/$1/new_page.html",},
+				"/project/$1/new_page.html"},
 			Want{
 				directive: "redirectmatch",
-				code: "301",
-				pattern: "^/project/([^/]+)/old_page.html$",
-				target: "/project/$1/new_page.html",
-				re: true,
+				code:      "301",
+				pattern:   "^/project/([^/]+)/old_page.html$",
+				target:    "/project/$1/new_page.html",
+				re:        true,
 			},
 		},
-
 	}
 
 	for n, test := range tests {
@@ -189,9 +187,9 @@ func TestRuleSetFirstMatchRedirectMatch(t *testing.T) {
 func TestRuleSetFindMatchesNone(t *testing.T) {
 	rs := RuleSet{[]Rule{}}
 	c := Check{
-		LineNum: 1,
-		Input: "/project/def/old_page.html",
-		Code: "301",
+		LineNum:  1,
+		Input:    "/project/def/old_page.html",
+		Code:     "301",
 		Expected: "/project/def/new_page.html",
 	}
 	s := Settings{Verbose: true, MaxHops: 0}
@@ -208,9 +206,9 @@ func TestRuleSetFindMatchesOne(t *testing.T) {
 		"/project/$1/new_page.html"})
 	rs := RuleSet{[]Rule{*r}}
 	c := Check{
-		LineNum: 1,
-		Input: "/project/def/old_page.html",
-		Code: "301",
+		LineNum:  1,
+		Input:    "/project/def/old_page.html",
+		Code:     "301",
 		Expected: "/project/def/new_page.html",
 	}
 	s := Settings{Verbose: true, MaxHops: 0}
@@ -234,9 +232,9 @@ redirectmatch 301 ^/renamed/new2/ /renamed/new3/
 	input := bytes.NewReader(data)
 	rs, _ := ParseRules(input)
 	c := Check{
-		LineNum: 1,
-		Input: "/renamed/old/",
-		Code: "301",
+		LineNum:  1,
+		Input:    "/renamed/old/",
+		Code:     "301",
 		Expected: "/renamed/new3/",
 	}
 	s := Settings{Verbose: true, MaxHops: 2}
@@ -257,9 +255,9 @@ redirect 301 /renamed/new2/ /renamed/old/
 	input := bytes.NewReader(data)
 	rs, _ := ParseRules(input)
 	c := Check{
-		LineNum: 1,
-		Input: "/renamed/old/",
-		Code: "301",
+		LineNum:  1,
+		Input:    "/renamed/old/",
+		Code:     "301",
 		Expected: "/renamed/new3/",
 	}
 	s := Settings{Verbose: true, MaxHops: 0}
