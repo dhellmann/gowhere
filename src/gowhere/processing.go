@@ -31,7 +31,7 @@ type Settings struct {
 }
 
 // Run all of the rules against the checks and produce a results set.
-func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) (*Results, error) {
+func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) *Results {
 	r := Results{}
 	used := make(map[int]bool)
 
@@ -99,5 +99,5 @@ func ProcessChecks(rules *RuleSet, checks []Check, settings Settings) (*Results,
 		}
 	}
 
-	return &r, nil
+	return &r
 }

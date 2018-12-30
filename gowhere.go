@@ -67,12 +67,7 @@ func main() {
 	}
 
 	settings := gowhere.Settings{*verbose, *max_hops}
-	results, err := gowhere.ProcessChecks(rules, checks, settings)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Processing failure: %v\n", err)
-		return
-	}
+	results := gowhere.ProcessChecks(rules, checks, settings)
 
 	failures := 0
 
