@@ -27,5 +27,4 @@ demonstrate how gowhere works:
 
 ## To-do list
 
-- tests for processing functions
 - pcre regexes?
