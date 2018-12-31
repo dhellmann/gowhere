@@ -7,12 +7,6 @@ import (
 
 	"github.com/dhellmann/gowhere/pkg/gowhere"
 )
-var ignoreUntested = flag.Bool("ignore-untested", false,
-	"ignore untested rules")
-var errorUntested = flag.Bool("error-untested", false,
-	"error if there are untested rules")
-var maxHops = flag.Int("max-hops", 0, "how many hops are allowed")
-var verbose = flag.Bool("v", false, "turn on verbose output")
 
 func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Match) {
 	fmt.Printf("%s on line %d: '%s' should produce %s '%s'\n",
@@ -24,6 +18,12 @@ func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Mat
 }
 
 func main() {
+	var ignoreUntested = flag.Bool("ignore-untested", false,
+		"ignore untested rules")
+	var errorUntested = flag.Bool("error-untested", false,
+		"error if there are untested rules")
+	var maxHops = flag.Int("max-hops", 0, "how many hops are allowed")
+	var verbose = flag.Bool("v", false, "turn on verbose output")
 	flag.Parse()
 	remaining := flag.Args()
 	if len(remaining) < 2 {
