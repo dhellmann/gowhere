@@ -10,7 +10,11 @@ detect incorrect redirection, cycles, and excessive hops.
 The `example` directory contains 2 input files that can be used to
 demonstrate how gowhere works:
 
-    $ go run gowhere.go example/htaccess example/tests.txt
+    $ go get github.com/dhellmann/gowhere/cmd/gowhere
+
+    $ cd $GOPATH/src/github.com/dhellmann/gowhere
+
+    $ $GOPATH/bin/gowhere example/htaccess example/tests.txt
     Unexpected rule matched check on line 7: '/old_root/index.html' should produce 301 '/new_root/not_index.html'
         /old_root/index.html -> 301 /new_root/index.html [line 9]
     Cycle found from rule on line 11: '/cycle/a' should produce 301 '/cycle/d'
@@ -21,9 +25,11 @@ demonstrate how gowhere works:
     Untested rule [line 7] redirectmatch ^/renamed/new1/ 301 /renamed/new2/
     Untested rule [line 12] redirect /cycle/b 301 /cycle/c
     Untested rule [line 13] redirect /cycle/c 301 /cycle/a
-    
+
     2 failures
-    exit status 1
+
+    $ echo $?
+    1
 
 ## To-do list
 
