@@ -31,6 +31,43 @@ demonstrate how gowhere works:
     $ echo $?
     1
 
+## Inputs
+
+To test a set of redirects, `gowhere` needs the input `.htaccess`
+file and another input file with test data.
+
+The `.htaccess` file should contain `Redirect` and
+`RedirectMatch` directives. Blank lines and lines starting with
+`#` are ignored. For example, this input includes 6 rules:
+
+   # Redirect old top-level HTML pages to the version under most recent
+   # full release.
+   redirectmatch 301 ^/$ /current-release/
+   redirectmatch 301 ^/index.html$ /current-release/
+   redirectmatch 301 ^/projects.html$ /current-release/projects.html
+   redirectmatch 301 ^/language-bindings.html$ /current-release/language-bindings.html
+
+   # Redirect subpage pointers to main page
+   redirect 301 /install/ /current-release/install/
+   redirect 301 /basic-install/ /current-release/install/
+
+   # this is gone and never coming back, indicate that to the end users
+   redirect 410 /obsolete_content.html
+
+The test data file should include one test per line, including 3
+parts: the input path, the expected HTTP response code, and the
+(optional) expected output path. For example:
+
+   / 301 /current-release/
+   / 301 /current-release
+   /install/ 301 /current-release/install/
+   /no/rule 301 /should/fail
+   /obsolete-content.html 410
+
+   # verify that this path is not redirected
+   /current-release/index.html 200
+
+
 ## To-do list
 
 - pcre regexes?
