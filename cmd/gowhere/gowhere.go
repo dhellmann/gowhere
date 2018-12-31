@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gowhere"
+	"github.com/dhellmann/gowhere/pkg/gowhere"
 )
 
 var ignore_untested = flag.Bool("ignore-untested", false,
