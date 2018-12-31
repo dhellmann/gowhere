@@ -114,7 +114,7 @@ func main() {
 			&(item.Check), item.Matches)
 	}
 
-	if ! *ignoreUntested {
+	if !*ignoreUntested {
 		for _, item := range results.Unmatched {
 			if *errorUntested {
 				failures++
