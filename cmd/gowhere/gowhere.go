@@ -114,11 +114,13 @@ func main() {
 			&(item.Check), item.Matches)
 	}
 
-	for _, item := range results.Unmatched {
-		if *errorUntested {
-			failures++
+	if ! *ignoreUntested {
+		for _, item := range results.Unmatched {
+			if *errorUntested {
+				failures++
+			}
+			fmt.Printf("Untested rule %s\n", item.String())
 		}
-		fmt.Printf("Untested rule %s\n", item.String())
 	}
 
 	if failures > 0 {
