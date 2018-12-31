@@ -17,6 +17,14 @@ func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Mat
 	}
 }
 
+func usage() {
+	fmt.Printf("gowhere [-h]\n")
+	fmt.Printf("gowhere [-v] [-ignore-untested] [-error-untested] [-max-hops N] <htaccess file> <test file>\n")
+	fmt.Printf("\n")
+	flag.PrintDefaults()
+	fmt.Printf("\n")
+}
+
 func main() {
 	var ignoreUntested = flag.Bool("ignore-untested", false,
 		"ignore untested rules")
@@ -24,11 +32,20 @@ func main() {
 		"error if there are untested rules")
 	var maxHops = flag.Int("max-hops", 0, "how many hops are allowed")
 	var verbose = flag.Bool("v", false, "turn on verbose output")
+	var help = flag.Bool("h", false, "show this help output")
+
 	flag.Parse()
+
+	if *help {
+		usage()
+		os.Exit(0)
+	}
+
 	remaining := flag.Args()
 	if len(remaining) < 2 {
 		fmt.Fprintf(os.Stderr,
-			"please specify htaccess file and test file\n")
+			"ERROR: please specify htaccess file and test file\n\n")
+		usage()
 		os.Exit(1)
 	}
 	if len(remaining) > 2 {
