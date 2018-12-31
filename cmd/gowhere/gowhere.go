@@ -29,12 +29,12 @@ func main() {
 	if len(remaining) < 2 {
 		fmt.Fprintf(os.Stderr,
 			"please specify htaccess file and test file\n")
-		return
+		os.Exit(1)
 	}
 	if len(remaining) > 2 {
 		fmt.Fprintf(os.Stderr,
 			"unrecognized arguments: %v\n", remaining[2:])
-		return
+		os.Exit(1)
 	}
 
 	htaccessFile, err := os.Open(remaining[0])
@@ -42,13 +42,13 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not read htaccess file %s: %v\n",
 			remaining[0], err)
-		return
+		os.Exit(2)
 	}
 	rules, err := gowhere.ParseRules(htaccessFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not parse htaccess file %s: %v\n",
 			remaining[0], err)
-		return
+		os.Exit(2)
 	}
 
 	testFile, err := os.Open(remaining[1])
@@ -56,13 +56,13 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not read test file %s: %v\n",
 			remaining[1], err)
-		return
+		os.Exit(2)
 	}
 	checks, err := gowhere.ParseChecks(testFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
 			remaining[1], err)
-		return
+		os.Exit(2)
 	}
 
 	settings := gowhere.Settings{*verbose, *maxHops}
