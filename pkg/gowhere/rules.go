@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-// A redirect rule
+// Rule represents one redirect rule
 type Rule struct {
 	// The line of the input file where the rule was found
 	LineNum int
@@ -28,7 +28,7 @@ func (r *Rule) String() string {
 		r.LineNum, r.Directive, r.Pattern, r.Code, r.Target)
 }
 
-// A test for a Rule
+// Check represents a test for one Rule
 type Check struct {
 	// The line of the input file where the check was found
 	LineNum int
@@ -40,28 +40,29 @@ type Check struct {
 	Expected string
 }
 
-// A Rule that has matched
+// Match holds the values for a Rule that has matched and the
+// destination of the redirect
 type Match struct {
 	Rule
 	// The matched destination for the redirection
 	Match string
 }
 
-// A group of Rules
+// RuleSet holds a group of Rules to be applied together
 type RuleSet struct {
 	rules []Rule
 }
 
-// Create a Rule from the strings on the input line
-func NewRule(line_num int, params []string) (*Rule, error) {
+// NewRule creates a Rule from the strings on the input line
+func NewRule(lineNum int, params []string) (*Rule, error) {
 	var r Rule
 
 	if len(params) < 3 {
 		return nil, fmt.Errorf("Not enough parameters on line %d: %v",
-			line_num, params)
+			lineNum, params)
 	}
 
-	r.LineNum = line_num
+	r.LineNum = lineNum
 	r.Directive = params[0]
 
 	if len(params) == 4 {
@@ -84,7 +85,7 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 		}
 	} else {
 		return nil, fmt.Errorf("Could not understand rule on line %d: %v",
-			line_num, params)
+			lineNum, params)
 	}
 
 	// Verify that we understand the directive and compile the
@@ -95,22 +96,22 @@ func NewRule(line_num int, params []string) (*Rule, error) {
 		re, err := regexp.Compile(r.Pattern)
 		if err != nil {
 			return nil, fmt.Errorf("Could not understand regexp '%s' in rule on line %d: %v",
-				r.Pattern, line_num, params)
+				r.Pattern, lineNum, params)
 		}
 		r.re = re
 	default:
 		return nil, fmt.Errorf("Could not understand dirctive '%s' in rule on line %d: %v",
-			r.Directive, line_num, params)
+			r.Directive, lineNum, params)
 	}
 
 	return &r, nil
 }
 
-// Create a Check from the strings on the input line
-func NewCheck(line_num int, params []string) (*Check, error) {
+// NewCheck creates a Check from the strings on the input line
+func NewCheck(lineNum int, params []string) (*Check, error) {
 	var t Check
 
-	t.LineNum = line_num
+	t.LineNum = lineNum
 
 	if len(params) == 3 {
 		// input code expected
@@ -129,10 +130,10 @@ func NewCheck(line_num int, params []string) (*Check, error) {
 	}
 
 	return nil, fmt.Errorf("Could not understand check on line %d: %v",
-		line_num, params)
+		lineNum, params)
 }
 
-// Test whether the rule matches the target string.
+// Match tests whether the rule matches the target string.
 //
 // Returns the matching string, so when the rule pattern is a regexp
 // and the target includes substitutions the return value is the
@@ -180,7 +181,7 @@ func (rs *RuleSet) firstMatch(target string, verbose bool) *Match {
 	return nil
 }
 
-// Find all of the Rules that match the test.
+// FindMatches locates all of the Rules that match the Check
 func (rs *RuleSet) FindMatches(check *Check, settings Settings) []Match {
 	var r []Match
 

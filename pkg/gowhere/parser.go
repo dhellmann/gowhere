@@ -6,13 +6,16 @@ import (
 	"strings"
 )
 
+// ParseRules reads the redirect rules (such as from an htaccess file)
+// and returns a RuleSet containing all of them. Stops on the first
+// error parsing the file.
 func ParseRules(fd io.Reader) (*RuleSet, error) {
 	var rules RuleSet
-	line_num := 0
+	lineNum := 0
 	input := bufio.NewScanner(fd)
 	for input.Scan() {
 		line := strings.Trim(input.Text(), " \t\n")
-		line_num++
+		lineNum++
 
 		if len(line) == 0 {
 			continue
@@ -21,7 +24,7 @@ func ParseRules(fd io.Reader) (*RuleSet, error) {
 			continue
 		}
 
-		r, err := NewRule(line_num, strings.Fields(line))
+		r, err := NewRule(lineNum, strings.Fields(line))
 		if err != nil {
 			return &rules, err
 		}
@@ -30,13 +33,15 @@ func ParseRules(fd io.Reader) (*RuleSet, error) {
 	return &rules, nil
 }
 
+// ParseChecks reads the rule checks and returns a slice of Check
+// objects. Stops on the first error parsing the file.
 func ParseChecks(fd io.Reader) ([]Check, error) {
 	var checks []Check
-	line_num := 0
+	lineNum := 0
 	input := bufio.NewScanner(fd)
 	for input.Scan() {
 		line := strings.Trim(input.Text(), " \t\n")
-		line_num++
+		lineNum++
 
 		if len(line) == 0 {
 			continue
@@ -45,7 +50,7 @@ func ParseChecks(fd io.Reader) ([]Check, error) {
 			continue
 		}
 
-		t, err := NewCheck(line_num, strings.Fields(line))
+		t, err := NewCheck(lineNum, strings.Fields(line))
 		if err != nil {
 			return checks, err
 		}

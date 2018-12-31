@@ -7,12 +7,11 @@ import (
 
 	"github.com/dhellmann/gowhere/pkg/gowhere"
 )
-
-var ignore_untested = flag.Bool("ignore-untested", false,
+var ignoreUntested = flag.Bool("ignore-untested", false,
 	"ignore untested rules")
-var error_untested = flag.Bool("error-untested", false,
+var errorUntested = flag.Bool("error-untested", false,
 	"error if there are untested rules")
-var max_hops = flag.Int("max-hops", 0, "how many hops are allowed")
+var maxHops = flag.Int("max-hops", 0, "how many hops are allowed")
 var verbose = flag.Bool("v", false, "turn on verbose output")
 
 func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Match) {
@@ -29,7 +28,7 @@ func main() {
 	remaining := flag.Args()
 	if len(remaining) < 2 {
 		fmt.Fprintf(os.Stderr,
-			"please specify htaccess_file and test_file\n")
+			"please specify htaccess file and test file\n")
 		return
 	}
 	if len(remaining) > 2 {
@@ -38,35 +37,35 @@ func main() {
 		return
 	}
 
-	htaccess_file, err := os.Open(remaining[0])
-	defer htaccess_file.Close()
+	htaccessFile, err := os.Open(remaining[0])
+	defer htaccessFile.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not read htaccess file %s: %v\n",
 			remaining[0], err)
 		return
 	}
-	rules, err := gowhere.ParseRules(htaccess_file)
+	rules, err := gowhere.ParseRules(htaccessFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not parse htaccess file %s: %v\n",
 			remaining[0], err)
 		return
 	}
 
-	test_file, err := os.Open(remaining[1])
-	defer test_file.Close()
+	testFile, err := os.Open(remaining[1])
+	defer testFile.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not read test file %s: %v\n",
 			remaining[1], err)
 		return
 	}
-	checks, err := gowhere.ParseChecks(test_file)
+	checks, err := gowhere.ParseChecks(testFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not parse test file %s: %v\n",
 			remaining[1], err)
 		return
 	}
 
-	settings := gowhere.Settings{*verbose, *max_hops}
+	settings := gowhere.Settings{*verbose, *maxHops}
 	results := gowhere.ProcessChecks(rules, checks, settings)
 
 	failures := 0
@@ -99,7 +98,7 @@ func main() {
 	}
 
 	for _, item := range results.Unmatched {
-		if *error_untested {
+		if *errorUntested {
 			failures++
 		}
 		fmt.Printf("Untested rule %s\n", item.String())
