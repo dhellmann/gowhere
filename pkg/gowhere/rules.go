@@ -55,37 +55,33 @@ type RuleSet struct {
 
 // NewRule creates a Rule from the strings on the input line
 func NewRule(lineNum int, params []string) (*Rule, error) {
-	var r Rule
-
 	if len(params) < 3 {
 		return nil, fmt.Errorf("Not enough parameters on line %d: %v",
 			lineNum, params)
 	}
+	if len(params) > 4 {
+		return nil, fmt.Errorf("Too many parameters on line %d: %v",
+			lineNum, params)
+	}
 
-	r.LineNum = lineNum
-	r.Directive = params[0]
+	r := Rule{LineNum: lineNum, Directive: params[0]}
 
 	if len(params) == 4 {
 		// redirect code pattern target
 		r.Code = params[1]
 		r.Pattern = params[2]
 		r.Target = params[3]
-	} else if len(params) == 3 {
-		if params[1] == "410" {
-			// The page has been deleted and is not coming
-			// back (nil target).
-			r.Code = params[1]
-			r.Pattern = params[2]
-		} else {
-			// redirect pattern target
-			// (code is implied)
-			r.Code = "301"
-			r.Pattern = params[1]
-			r.Target = params[2]
-		}
+	} else if params[1] == "410" {
+		// The page has been deleted and is not coming
+		// back (nil target).
+		r.Code = params[1]
+		r.Pattern = params[2]
 	} else {
-		return nil, fmt.Errorf("Could not understand rule on line %d: %v",
-			lineNum, params)
+		// redirect pattern target
+		// (code is implied)
+		r.Code = "301"
+		r.Pattern = params[1]
+		r.Target = params[2]
 	}
 
 	// Verify that we understand the directive and compile the
