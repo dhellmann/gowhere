@@ -17,6 +17,48 @@ func showCheckAndMatches(msg string, check *gowhere.Check, matches []gowhere.Mat
 	}
 }
 
+func summarizeResults(results *gowhere.Results, verbose bool,
+	ignoreUntested bool, errorUntested bool) (failures int32) {
+
+	if verbose {
+		fmt.Println("")
+	}
+
+	for _, item := range results.Mismatched {
+		failures++
+		if len(item.Matches) > 0 {
+			showCheckAndMatches("Unexpected rule matched check",
+				&(item.Check), item.Matches)
+		} else {
+			showCheckAndMatches("No rule matched check",
+				&(item.Check), item.Matches)
+		}
+	}
+
+	for _, item := range results.Cycles {
+		failures++
+		showCheckAndMatches("Cycle found from rule",
+			&(item.Check), item.Matches)
+	}
+
+	for _, item := range results.ExceededHops {
+		failures++
+		showCheckAndMatches("Excessive redirects found from rule",
+			&(item.Check), item.Matches)
+	}
+
+	if !ignoreUntested {
+		for _, item := range results.Unmatched {
+			if errorUntested {
+				failures++
+			}
+			fmt.Printf("Untested rule %s\n", item.String())
+		}
+	}
+
+	return failures
+}
+
 func usage() {
 	fmt.Printf("gowhere [-h]\n")
 	fmt.Printf("gowhere [-v] [-ignore-untested] [-error-untested] [-max-hops N] <htaccess file> <test file>\n")
@@ -84,44 +126,8 @@ func main() {
 
 	settings := gowhere.Settings{*verbose, *maxHops}
 	results := gowhere.ProcessChecks(rules, checks, settings)
-
-	failures := 0
-
-	if *verbose {
-		fmt.Println("")
-	}
-
-	for _, item := range results.Mismatched {
-		failures++
-		if len(item.Matches) > 0 {
-			showCheckAndMatches("Unexpected rule matched check",
-				&(item.Check), item.Matches)
-		} else {
-			showCheckAndMatches("No rule matched check",
-				&(item.Check), item.Matches)
-		}
-	}
-
-	for _, item := range results.Cycles {
-		failures++
-		showCheckAndMatches("Cycle found from rule",
-			&(item.Check), item.Matches)
-	}
-
-	for _, item := range results.ExceededHops {
-		failures++
-		showCheckAndMatches("Excessive redirects found from rule",
-			&(item.Check), item.Matches)
-	}
-
-	if !*ignoreUntested {
-		for _, item := range results.Unmatched {
-			if *errorUntested {
-				failures++
-			}
-			fmt.Printf("Untested rule %s\n", item.String())
-		}
-	}
+	failures := summarizeResults(results, *verbose,
+		*ignoreUntested, *errorUntested)
 
 	if failures > 0 {
 		fmt.Fprintf(os.Stderr, "\n%d failures\n", failures)
