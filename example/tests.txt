@@ -9,3 +9,5 @@
 /renamed/old/ 301 /renamed/new2/
 
 /cycle/a 301 /cycle/d
+
+/no-match/index.html 301 /yes-match/index.html
